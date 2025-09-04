@@ -1,14 +1,16 @@
 import React from 'react';
 
-const EventCard = ({ event }) => {
+const EventCard = ({ evento }) => {
+  if (!evento) return null; // evita errores si es undefined
+
   return (
     <div className="event-card">
-      <h2>{event.title}</h2>
-      <p><strong>Descripción:</strong> {event.description}</p>
-      <p><strong>Nombre del Evento:</strong> {event.nombreEvento}</p>
-      <p><strong>Lugar:</strong> {event.lugar}</p>
-      <p><strong>Tipo:</strong> {event.tipo}</p>
-      <p><strong>Estado:</strong> {event.is_active ? 'Activo' : 'Inactivo'}</p>
+      <h2>{evento.title}</h2>
+      <p><strong>Descripción:</strong> {evento.description}</p>
+      <p><strong>Nombre del Evento:</strong> {evento.nombreEvento}</p>
+      <p><strong>Lugar:</strong> {evento.lugar}</p>
+      <p><strong>Tipo:</strong> {evento.tipo}</p>
+      <p><strong>Estado:</strong> {evento.is_active ? 'Activo' : 'Inactivo'}</p>
     </div>
   );
 };
