@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const EventForm = ({ onEventCreated }) => {
+const EventForm = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -9,6 +9,12 @@ const EventForm = ({ onEventCreated }) => {
     tipo: '',
     is_active: true,
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,22 +27,18 @@ const EventForm = ({ onEventCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:3000/api/eventos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error('Error creando evento');
-
-      setFormData({
-        title: '',
-        description: '',
-        nombreEvento: '',
-        lugar: '',
-        tipo: '',
-        is_active: true,
-      });
-      onEventCreated(); // refrescar lista
+      onSave(formData);
+      if (!initialData) {
+        // Solo limpia el formulario si es creación, no edición
+        setFormData({
+          title: '',
+          description: '',
+          nombreEvento: '',
+          lugar: '',
+          tipo: '',
+          is_active: true,
+        });
+      }
     } catch (err) {
       alert(err.message);
     }
@@ -44,16 +46,60 @@ const EventForm = ({ onEventCreated }) => {
 
   return (
     <form onSubmit={handleSubmit} className="event-form">
-      <input name="title" placeholder="Título" value={formData.title} onChange={handleChange} required />
-      <input name="description" placeholder="Descripción" value={formData.description} onChange={handleChange} required />
-      <input name="nombreEvento" placeholder="Nombre del Evento" value={formData.nombreEvento} onChange={handleChange} required />
-      <input name="lugar" placeholder="Lugar" value={formData.lugar} onChange={handleChange} required />
-      <input name="tipo" placeholder="Tipo" value={formData.tipo} onChange={handleChange} required />
+      <input 
+        name="title" 
+        placeholder="Título" 
+        value={formData.title} 
+        onChange={handleChange} 
+        required 
+      />
+      <input 
+        name="description" 
+        placeholder="Descripción" 
+        value={formData.description} 
+        onChange={handleChange} 
+        required 
+      />
+      <input 
+        name="nombreEvento" 
+        placeholder="Nombre del Evento" 
+        value={formData.nombreEvento} 
+        onChange={handleChange} 
+        required 
+      />
+      <input 
+        name="lugar" 
+        placeholder="Lugar" 
+        value={formData.lugar} 
+        onChange={handleChange} 
+        required 
+      />
+      <input 
+        name="tipo" 
+        placeholder="Tipo" 
+        value={formData.tipo} 
+        onChange={handleChange} 
+        required 
+      />
       <label>
-        <input type="checkbox" name="is_active" checked={formData.is_active} onChange={handleChange} />
+        <input 
+          type="checkbox" 
+          name="is_active" 
+          checked={formData.is_active} 
+          onChange={handleChange} 
+        />
         Activo
       </label>
-      <button type="submit">Crear Evento</button>
+      <div className="form-buttons">
+        <button type="submit">
+          {initialData ? 'Actualizar' : 'Crear'} Evento
+        </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel}>
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   );
 };
