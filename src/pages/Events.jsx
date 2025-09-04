@@ -7,6 +7,7 @@ const Eventos = () => {
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [eventoEditando, setEventoEditando] = useState(null);
 
   const fetchEventos = async () => {
     try {
@@ -27,17 +28,16 @@ const Eventos = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    // Aquí puedes agregar endpoint DELETE si lo creas en backend
     alert("Funcionalidad de eliminar aún no implementada");
   };
 
-  const handleEdit = (id) => {
-    alert(`Editar evento con ID: ${id}`);
+  const handleEdit = (evento) => {
+    setEventoEditando(evento);
   };
 
   const handleToggleActive = async (id) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/evento/${id}/toggle`, {
+      const res = await fetch(`http://localhost:3000/api/eventos/${id}/toggle`, {
         method: 'PATCH'
       });
       const data = await res.json();
@@ -46,6 +46,39 @@ const Eventos = () => {
       alert('Error al cambiar estado del evento');
     }
   };
+
+ const handleSave = async (eventoData) => {
+  try {
+    let res;
+    if (eventoEditando) {
+      // Editar evento existente
+      res = await fetch(`http://localhost:3000/api/eventos/${eventoEditando.id}/update`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(eventoData)
+      });
+    } else {
+      // Crear nuevo evento
+      res = await fetch('http://localhost:3000/api/eventos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventoData)
+      });
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Error al procesar la solicitud');
+    }
+    
+    setEventoEditando(null);
+    await fetchEventos();
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   return (
     <div className="eventos-page">
@@ -56,8 +89,12 @@ const Eventos = () => {
 
       <div className="eventos-main">
         <div className="eventos-form">
-          <h2>Crear Nuevo Evento</h2>
-          <EventForm onEventCreated={fetchEventos} />
+          <h2>{eventoEditando ? 'Editar Evento' : 'Crear Nuevo Evento'}</h2>
+          <EventForm
+            initialData={eventoEditando}
+            onSave={handleSave}
+            onCancel={() => setEventoEditando(null)}
+          />
         </div>
 
         <div className="eventos-list">
@@ -80,7 +117,7 @@ const Eventos = () => {
                 key={evento.id}
                 evento={evento}
                 onDelete={handleDelete}
-                onEdit={handleEdit}
+                onEdit={() => handleEdit(evento)}
                 onToggleActive={handleToggleActive}
               />
             ))
