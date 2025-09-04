@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import EventCard from '../components/EventCard';
 import EventForm from '../components/EventForm';
-import './Eventos.css';
+import './Events.css';
 
 const Eventos = () => {
   const [eventos, setEventos] = useState([]);
