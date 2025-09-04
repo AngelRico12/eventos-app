@@ -28,8 +28,10 @@
     "vite": "^7.1.2"
   },
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "allowJs": true,     
-    "checkJs": false
-  }
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-jsx"
+  },
+  "include": ["src"]
 }
+
