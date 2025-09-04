@@ -4,14 +4,16 @@ import db from "./db.js";
 
 const app = express();
 
-// Permitir requests desde cualquier origen (o especificar solo el frontend)
+// Permitir requests desde el frontend
 app.use(cors({
-  origin: "http://localhost:5173"  // <- URL de tu frontend
+  origin: "http://localhost:5173", // URL de tu frontend
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
 
-// Endpoints
+// GET /api/eventos
 app.get("/api/eventos", async (req, res) => {
   try {
     const [rows] = await db.execute("SELECT * FROM eventos");
@@ -21,11 +23,12 @@ app.get("/api/eventos", async (req, res) => {
   }
 });
 
+// POST /api/eventos
 app.post("/api/eventos", async (req, res) => {
-  const { title, description, instructor, duration, price, category, is_active } = req.body;
+  const { title, description, nombreEvento, lugar, tipo, is_active } = req.body;
   try {
     const [result] = await db.execute(
-      "INSERT INTO courses (title, description, nombreEvento, lugar, tipo, is_active) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO eventos (title, description, nombreEvento, lugar, tipo, is_active) VALUES (?, ?, ?, ?, ?, ?)",
       [title, description, nombreEvento, lugar, tipo, is_active]
     );
     res.json({ id: result.insertId, title, description, nombreEvento, lugar, tipo, is_active });
@@ -34,15 +37,21 @@ app.post("/api/eventos", async (req, res) => {
   }
 });
 
+// PATCH /api/evento/:id/toggle
 app.patch("/api/evento/:id/toggle", async (req, res) => {
   const { id } = req.params;
   try {
-    const [evento] = await db.execute("SELECT is_active FROM evento WHERE id = ?", [id]);
+    const [evento] = await db.execute("SELECT is_active FROM eventos WHERE id = ?", [id]);
     if (!evento.length) return res.status(404).json({ error: "Evento no encontrado" });
+
     const newStatus = !evento[0].is_active;
-    await db.execute("UPDATE evento SET is_active = ? WHERE id = ?", [newStatus, id]);
+    await db.execute("UPDATE eventos SET is_active = ? WHERE id = ?", [newStatus, id]);
     res.json({ id, is_active: newStatus });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.listen(3000, () => {
+  console.log("Servidor corriendo en http://localhost:3000");
 });
